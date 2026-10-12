@@ -1,0 +1,8 @@
+*.env/
+.venv/
+project/.env/
+project/.env*
+/project/.env
+.env.venv/
+.env
+/project/.env

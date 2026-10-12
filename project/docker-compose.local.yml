@@ -1,0 +1,38 @@
+services:
+  geoserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GS_VERSION: "2.26.4"
+    image: ${GEOSERVER_IMAGE:-geoserver-custom:2.26.4}
+    restart: unless-stopped
+    ports:
+      - "${GEOSERVER_PORT:-8080}:8080"
+    environment:
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:?Set GEOSERVER_ADMIN_USER in project/.env}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:?Set GEOSERVER_ADMIN_PASSWORD in project/.env}
+      GEOSERVER_DATA_DIR: /opt/geoserver/data_dir
+      GEOWEBCACHE_CACHE_DIR: /opt/geoserver/data_dir/gwc
+      EXTRA_JAVA_OPTS: ${EXTRA_JAVA_OPTS:--Xms1G -Xmx2G}
+    init: true
+    stop_grace_period: 60s
+    volumes:
+      - geoserver_data:/opt/geoserver/data_dir
+      - geoserver_fonts:/opt/fonts
+      - geoserver_certs:/etc/certs
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/geoserver/web/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+volumes:
+  geoserver_data:
+    name: geoserver_local_data
+  geoserver_fonts:
+    name: geoserver_local_fonts
+  geoserver_certs:
+    name: geoserver_local_certs

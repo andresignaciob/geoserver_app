@@ -1,0 +1,47 @@
+name: Build and deploy GeoServer to Azure App Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "project/**"
+      - "scripts/deploy-appservice.sh"
+      - ".github/workflows/deploy-appservice.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GS_VERSION: "2.26.4"
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build, publish, configure storage and deploy
+        env:
+          ACR_NAME: ${{ vars.ACR_NAME }}
+          ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+          IMAGE_TAG: ${{ github.sha }}
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+          ADMIN_USER: ${{ vars.GEOSERVER_ADMIN_USER }}
+          ADMIN_PASSWORD: ${{ secrets.GEOSERVER_ADMIN_PASSWORD }}
+          STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
+          STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+          SHARE_DATA: ${{ vars.AZURE_APPSERVICE_SHARE_DATA }}
+          SHARE_FONTS: ${{ vars.AZURE_APPSERVICE_SHARE_FONTS }}
+          SHARE_CERTS: ${{ vars.AZURE_APPSERVICE_SHARE_CERTS }}
+        run: bash scripts/deploy-appservice.sh
