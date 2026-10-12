@@ -42,6 +42,4 @@ jobs:
           STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
           STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
           SHARE_DATA: ${{ vars.AZURE_APPSERVICE_SHARE_DATA }}
-          SHARE_FONTS: ${{ vars.AZURE_APPSERVICE_SHARE_FONTS }}
-          SHARE_CERTS: ${{ vars.AZURE_APPSERVICE_SHARE_CERTS }}
         run: bash scripts/deploy-appservice.sh

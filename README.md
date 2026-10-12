@@ -17,17 +17,17 @@ GeoServer is available at `http://localhost:8080/geoserver/web/`. The local Comp
 
 The root `docker-compose.yml` is the CIFS configuration for a Linux Docker host. It mounts three folders from `AZURE_FILE_SHARE` in the storage account: `data_dir`, `fonts`, and `certs`. It is not the mechanism App Service uses to mount storage.
 
-App Service mounts complete Azure Files shares at container paths; it cannot mount a subdirectory of one share. The deployment therefore expects three shares in the same account:
+App Service mounts the complete Azure Files share at `/opt/geoserver`. The share must contain these subdirectories:
 
-| Share | Container mount path |
+| Share subdirectory | Container path |
 | --- | --- |
-| `AZURE_APPSERVICE_SHARE_DATA` | `/opt/geoserver/data_dir` |
-| `AZURE_APPSERVICE_SHARE_FONTS` | `/opt/fonts` |
-| `AZURE_APPSERVICE_SHARE_CERTS` | `/etc/certs` |
+| `data_dir/` | `/opt/geoserver/data_dir` |
+| `fonts/` | `/opt/geoserver/fonts` |
+| `certs/` | `/opt/geoserver/certs` |
 
-The deployment creates these shares if needed and configures the three App Service storage mounts. Before first production use, copy the existing `data_dir`, `fonts`, and `certs` folder contents from the current `AZURE_FILE_SHARE` into their corresponding App Service shares, for example with Azure Storage Explorer. Do not start production against newly-created empty data/font/certificate shares if they contain data needed by the service.
+The deployment creates the share if needed and configures one App Service storage mount. Before first production use, copy the existing `data_dir`, `fonts`, and `certs` folder contents into these corresponding subdirectories, for example with Azure Storage Explorer. Do not start production against an empty share if it contains data needed by the service.
 
-`web.xml` and the GeoServer application files/plugins stay inside the versioned container image; App Service does not mount `WEB-INF`. On deployment, the script removes an existing App Service mount named `geoserver-web` but leaves that Azure File Share and its contents untouched. Review and remove the old share manually only after confirming it is no longer needed.
+`web.xml` and the GeoServer application files/plugins stay inside the versioned container image; App Service does not mount `WEB-INF`. On deployment, the script removes old App Service mounts used by the previous layout, but leaves their Azure File Shares and contents untouched. Review and remove old shares manually only after confirming they are no longer needed.
 
 ## App Service prerequisites
 
@@ -43,8 +43,7 @@ Set these GitHub repository variables:
 - `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`
 - `ACR_NAME`, `ACR_LOGIN_SERVER`
 - `AZURE_STORAGE_ACCOUNT`
-- `AZURE_APPSERVICE_SHARE_DATA`, `AZURE_APPSERVICE_SHARE_FONTS`
-- `AZURE_APPSERVICE_SHARE_CERTS`
+- `AZURE_APPSERVICE_SHARE_DATA`
 - `GEOSERVER_ADMIN_USER`
 
 Set these GitHub repository secrets:
@@ -64,8 +63,7 @@ Set these pipeline variables (or place them in a restricted variable group):
 - `ACR_NAME`, `ACR_LOGIN_SERVER`
 - `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`
 - `AZURE_STORAGE_ACCOUNT`
-- `AZURE_APPSERVICE_SHARE_DATA`, `AZURE_APPSERVICE_SHARE_FONTS`
-- `AZURE_APPSERVICE_SHARE_CERTS`
+- `AZURE_APPSERVICE_SHARE_DATA`
 - `GEOSERVER_ADMIN_USER`
 
 Set `AZURE_STORAGE_KEY` and `GEOSERVER_ADMIN_PASSWORD` as secret variables. Limit variable-group and service-connection permissions to this pipeline. The pipeline deploys on pushes to `main` and can also be run manually; configure Azure DevOps approvals/checks on the production environment or pipeline before enabling automatic production deployment.

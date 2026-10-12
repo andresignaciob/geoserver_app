@@ -12,8 +12,6 @@ set -euo pipefail
 : "${STORAGE_ACCOUNT:?Set AZURE_STORAGE_ACCOUNT}"
 : "${STORAGE_KEY:?Set AZURE_STORAGE_KEY secret}"
 : "${SHARE_DATA:?Set AZURE_APPSERVICE_SHARE_DATA}"
-: "${SHARE_FONTS:?Set AZURE_APPSERVICE_SHARE_FONTS}"
-: "${SHARE_CERTS:?Set AZURE_APPSERVICE_SHARE_CERTS}"
 
 image="${ACR_LOGIN_SERVER}/geoserver:${IMAGE_TAG}"
 
@@ -25,46 +23,34 @@ docker build \
   project
 docker push "$image"
 
-for share in "$SHARE_DATA" "$SHARE_FONTS" "$SHARE_CERTS"; do
-  az storage share create \
-    --name "$share" \
-    --account-name "$STORAGE_ACCOUNT" \
-    --account-key "$STORAGE_KEY" \
-    --only-show-errors \
-    --output none
-done
+az storage share create \
+  --name "$SHARE_DATA" \
+  --account-name "$STORAGE_ACCOUNT" \
+  --account-key "$STORAGE_KEY" \
+  --only-show-errors \
+  --output none
 
-web_mount_count="$(az webapp config storage-account list \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$WEBAPP_NAME" \
-  --query "[?name=='geoserver-web'] | length(@)" \
-  --output tsv)"
-if [[ "$web_mount_count" != "0" ]]; then
-  az webapp config storage-account delete \
+for mount_id in geoserver-web geoserver-data geoserver-fonts geoserver-certs geoserver-storage; do
+  mount_count="$(az webapp config storage-account list \
     --resource-group "$RESOURCE_GROUP" \
     --name "$WEBAPP_NAME" \
-    --custom-id geoserver-web \
-    --only-show-errors \
-    --output none
-fi
+    --query "[?name=='${mount_id}'] | length(@)" \
+    --output tsv)"
+  if [[ "$mount_count" != "0" ]]; then
+    az webapp config storage-account delete \
+      --resource-group "$RESOURCE_GROUP" \
+      --name "$WEBAPP_NAME" \
+      --custom-id "$mount_id" \
+      --only-show-errors \
+      --output none
+  fi
+done
 
 az webapp config storage-account add \
   --resource-group "$RESOURCE_GROUP" --name "$WEBAPP_NAME" \
-  --custom-id geoserver-data --storage-type AzureFiles \
+  --custom-id geoserver-storage --storage-type AzureFiles \
   --account-name "$STORAGE_ACCOUNT" --share-name "$SHARE_DATA" \
-  --access-key "$STORAGE_KEY" --mount-path /opt/geoserver/data_dir \
-  --only-show-errors --output none
-az webapp config storage-account add \
-  --resource-group "$RESOURCE_GROUP" --name "$WEBAPP_NAME" \
-  --custom-id geoserver-fonts --storage-type AzureFiles \
-  --account-name "$STORAGE_ACCOUNT" --share-name "$SHARE_FONTS" \
-  --access-key "$STORAGE_KEY" --mount-path /opt/fonts \
-  --only-show-errors --output none
-az webapp config storage-account add \
-  --resource-group "$RESOURCE_GROUP" --name "$WEBAPP_NAME" \
-  --custom-id geoserver-certs --storage-type AzureFiles \
-  --account-name "$STORAGE_ACCOUNT" --share-name "$SHARE_CERTS" \
-  --access-key "$STORAGE_KEY" --mount-path /etc/certs \
+  --access-key "$STORAGE_KEY" --mount-path /opt/geoserver \
   --only-show-errors --output none
 
 az webapp config container set \
