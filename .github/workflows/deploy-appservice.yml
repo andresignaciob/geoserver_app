@@ -18,7 +18,6 @@ env:
 
 jobs:
   build-push-deploy:
-    environment: AzureNacho
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
