@@ -60,12 +60,12 @@ az storage share create \
 
 log "Removing obsolete App Service storage mounts"
 for mount_id in geoserver-web geoserver-data geoserver-fonts geoserver-certs geoserver-storage; do
-  mount_count="$(az webapp config storage-account list \
+  mount_name="$(az webapp config storage-account list \
     --resource-group "$RESOURCE_GROUP" \
     --name "$WEBAPP_NAME" \
-    --query "[?name=='${mount_id}'] | length(@)" \
+    --query "[?name=='${mount_id}'].name | [0]" \
     --output tsv)"
-  if [[ "$mount_count" != "0" ]]; then
+  if [[ -n "$mount_name" ]]; then
     az webapp config storage-account delete \
       --resource-group "$RESOURCE_GROUP" \
       --name "$WEBAPP_NAME" \
