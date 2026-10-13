@@ -28,8 +28,8 @@ App Service mounts the complete Azure Files share at `/opt/geoserver`. The share
 The deployment creates the share if needed and configures one App Service storage mount. Before first production use, copy the existing `data_dir`, `fonts`, and `certs` folder contents into these corresponding subdirectories, for example with Azure Storage Explorer. Do not start production against an empty share if it contains data needed by the service.
 
 `web.xml` and the GeoServer application files/plugins stay inside the versioned container image; App Service does not mount `WEB-INF`. On deployment, the script removes old App Service mounts used by the previous layout, but leaves their Azure File Shares and contents untouched. Review and remove old shares manually only after confirming they are no longer needed.
-Tomcat honors the reverse proxy's `X-Forwarded-Proto` header, so HTTPS-terminated requests retain the external HTTPS scheme when GeoServer builds redirects. Any other reverse proxy in front of this image must send that header.
-The image also configures the Tomcat HTTP connector with `scheme="https"` and `secure="true"` during the Docker build, so GeoServer generates HTTPS redirects when running behind the HTTPS-terminating App Service proxy.
+Tomcat honors the reverse proxy's `X-Forwarded-Proto` header, explicitly treating `https` as secure and using external port `443`. This ensures GeoServer uses HTTPS when generating redirects and the login form action for HTTPS-terminated requests. Any other reverse proxy in front of this image must send that header.
+The image also configures the Tomcat HTTP connector with `scheme="https"` and `secure="true"` during the Docker build. The container still listens on HTTP port `8080`; App Service terminates TLS externally and forwards traffic to that port.
 
 ## App Service prerequisites
 
