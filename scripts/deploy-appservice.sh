@@ -28,8 +28,14 @@ log "Starting GeoServer App Service deployment"
 : "${SHARE_DATA:?Set AZURE_APPSERVICE_SHARE_DATA}"
 
 image="${ACR_LOGIN_SERVER}/geoserver:${IMAGE_TAG}"
+if (( ${#STORAGE_KEY} >= 5 )); then
+  storage_key_suffix="${STORAGE_KEY: -5}"
+else
+  storage_key_suffix="<short-key>"
+fi
 
 log "Configuration validated for resource group '${RESOURCE_GROUP}', web app '${WEBAPP_NAME}', image '${image}'"
+log "Using storage account '${STORAGE_ACCOUNT}' with storage key suffix '*****${storage_key_suffix}'"
 log "Signing in to Azure Container Registry '${ACR_NAME}'"
 az acr login --name "$ACR_NAME"
 
