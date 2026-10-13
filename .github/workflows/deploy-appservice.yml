@@ -38,6 +38,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
           WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+          WEBAPP_URL: ${{ vars.WEBAPP_URL }}
           ADMIN_USER: ${{ vars.GEOSERVER_ADMIN_USER }}
           ADMIN_PASSWORD: ${{ secrets.GEOSERVER_ADMIN_PASSWORD }}
           STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}

@@ -21,6 +21,7 @@ log "Starting GeoServer App Service deployment"
 : "${ACR_LOGIN_SERVER:?Set ACR_LOGIN_SERVER}"
 : "${RESOURCE_GROUP:?Set AZURE_RESOURCE_GROUP}"
 : "${WEBAPP_NAME:?Set AZURE_WEBAPP_NAME}"
+: "${WEBAPP_URL:?Set WEBAPP_URL}"
 : "${ADMIN_USER:?Set GEOSERVER_ADMIN_USER}"
 : "${ADMIN_PASSWORD:?Set GEOSERVER_ADMIN_PASSWORD secret}"
 : "${STORAGE_ACCOUNT:?Set AZURE_STORAGE_ACCOUNT}"
@@ -113,7 +114,7 @@ log "Restarting App Service"
 az webapp restart --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" \
   --only-show-errors --output none
 
-health_url="https://${WEBAPP_NAME}.azurewebsites.net/geoserver/web/"
+health_url="${WEBAPP_URL%/}/geoserver/web/"
 log "Waiting for GeoServer health endpoint: ${health_url}"
 for attempt in $(seq 1 60); do
   if curl --fail --silent --show-error --output /dev/null "$health_url"; then

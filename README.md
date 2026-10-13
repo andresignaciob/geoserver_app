@@ -40,7 +40,7 @@ The GitHub Actions identity uses OIDC. Create a federated credential for this re
 Set these GitHub repository variables:
 
 - `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
-- `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`
+- `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`, `WEBAPP_URL`
 - `ACR_NAME`, `ACR_LOGIN_SERVER`
 - `AZURE_STORAGE_ACCOUNT`
 - `AZURE_APPSERVICE_SHARE_DATA`
@@ -61,7 +61,7 @@ Set these pipeline variables (or place them in a restricted variable group):
 
 - `AZURE_SERVICE_CONNECTION` (name of the Azure Resource Manager service connection)
 - `ACR_NAME`, `ACR_LOGIN_SERVER`
-- `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`
+- `AZURE_RESOURCE_GROUP`, `AZURE_WEBAPP_NAME`, `WEBAPP_URL`
 - `AZURE_STORAGE_ACCOUNT`
 - `AZURE_APPSERVICE_SHARE_DATA`
 - `GEOSERVER_ADMIN_USER`
