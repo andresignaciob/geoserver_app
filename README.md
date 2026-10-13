@@ -29,6 +29,7 @@ The deployment creates the share if needed and configures one App Service storag
 
 `web.xml` and the GeoServer application files/plugins stay inside the versioned container image; App Service does not mount `WEB-INF`. On deployment, the script removes old App Service mounts used by the previous layout, but leaves their Azure File Shares and contents untouched. Review and remove old shares manually only after confirming they are no longer needed.
 Tomcat honors the reverse proxy's `X-Forwarded-Proto` header, so HTTPS-terminated requests retain the external HTTPS scheme when GeoServer builds redirects. Any other reverse proxy in front of this image must send that header.
+The image also configures the Tomcat HTTP connector with `scheme="https"` and `secure="true"` during the Docker build, so GeoServer generates HTTPS redirects when running behind the HTTPS-terminating App Service proxy.
 
 ## App Service prerequisites
 

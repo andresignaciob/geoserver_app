@@ -51,5 +51,6 @@ COPY web.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml
 RUN set -eu; \
     server_xml=/usr/local/tomcat/conf/server.xml; \
     grep -q '<Engine name="Catalina" defaultHost="localhost">' "$server_xml"; \
+    grep -q 'protocol="HTTP/1.1"' "$server_xml"; \
+    sed -i 's/protocol="HTTP\/1.1"/protocol="HTTP\/1.1" scheme="https" secure="true"/' "$server_xml"; \
     sed -i '/<Engine name="Catalina" defaultHost="localhost">/a\        <Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="X-Forwarded-Proto" />' "$server_xml"
-
